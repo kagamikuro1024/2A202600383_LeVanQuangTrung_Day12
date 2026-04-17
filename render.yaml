@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: day12-agent
+    runtime: docker
+    repo: https://github.com/kagamikuro1024/2A202600383_LeVanQuangTrung_Day12
+    dockerfile: ./Dockerfile
+    
+    # Port mapping
+    port: 8000
+    
+    # Environment variables
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: info
+      - key: AGENT_API_KEY
+        value: sk-test-default-key-change-in-dashboard
+      - key: DEBUG
+        value: "false"
+    
+    # Health check
+    healthCheckPath: /health
+    
+    # Auto-deploy on git push
+    autoDeploy: true
