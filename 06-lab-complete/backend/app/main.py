@@ -3,18 +3,27 @@ FastAPI Backend for TA Chatbot
 Handles AI agent logic, RAG, escalation, and security
 """
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import Dict, Optional
 import os
 from dotenv import load_dotenv
 import logging
+import sys
+from pathlib import Path
+
+# Add parent directory to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from agent import stream_chat
-from utils.storage import get_metrics, update_metric, save_chat_session, load_chat_session
+from utils.storage import get_metrics, update_metric
 from utils.email_service import send_escalation_email
-from security import RateLimiter, CostGuard, HealthMonitor
+
+from app.config import MAX_REQUESTS_PER_WINDOW, RATE_LIMIT_WINDOW_SECONDS, PER_USER_DAILY_BUDGET, GLOBAL_DAILY_BUDGET
+from app.rate_limiter import RateLimiter
+from app.cost_guard import CostGuard
+from app.health import HealthMonitor
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -36,11 +45,11 @@ app.add_middleware(
 )
 
 # Initialize security
-rate_limiter = RateLimiter(max_requests=20, window_seconds=60)
-cost_guard = CostGuard(per_user_budget=1.0, global_budget=10.0)
+rate_limiter = RateLimiter(max_requests=MAX_REQUESTS_PER_WINDOW, window_seconds=RATE_LIMIT_WINDOW_SECONDS)
+cost_guard = CostGuard(per_user_budget=PER_USER_DAILY_BUDGET, global_budget=GLOBAL_DAILY_BUDGET)
 health_monitor = HealthMonitor()
 
-# Models
+# ===== Models =====
 class ChatMessage(BaseModel):
     content: str
     user_id: Optional[str] = None
@@ -64,7 +73,7 @@ class HealthResponse(BaseModel):
     error_count: int
     error_rate: float
 
-# Routes
+# ===== Routes =====
 @app.post("/chat", response_model=ChatResponse)
 async def chat(message: ChatMessage):
     """Process user chat message"""
@@ -73,29 +82,33 @@ async def chat(message: ChatMessage):
     try:
         # Rate limit check
         if not rate_limiter.check(user_id):
+            remaining = rate_limiter.get_remaining(user_id)
             health_monitor.record_request(success=False)
             raise HTTPException(
                 status_code=429,
-                detail=f"Rate limit exceeded: 20 requests per 60 seconds"
+                detail=f"Rate limit exceeded: {remaining}/{MAX_REQUESTS_PER_WINDOW} requests remaining"
             )
         
         # Budget check
-        user_stats = cost_guard.get_user_stats(user_id)
-        if user_stats['usage_percent'] >= 100:
+        allowed, msg = cost_guard.check_user_budget(user_id)
+        if not allowed:
             health_monitor.record_request(success=False)
-            raise HTTPException(
-                status_code=402,
-                detail=f"Budget exceeded: ${user_stats['spent_today']:.2f} / ${user_stats['budget']:.2f}"
-            )
+            raise HTTPException(status_code=402, detail=msg)
         
-        # Stream response
+        # Global budget check
+        allowed, msg = cost_guard.check_global_budget()
+        if not allowed:
+            health_monitor.record_request(success=False)
+            raise HTTPException(status_code=402, detail=f"Global: {msg}")
+        
+        # Stream response from agent
         response_chunks = []
         for chunk in stream_chat(message.content, []):
             response_chunks.append(chunk)
         
         full_response = "".join(response_chunks)
         
-        # Track cost
+        # Track cost (estimate based on token count)
         input_tokens = len(message.content) // 4
         output_tokens = len(full_response) // 4
         cost_guard.record_usage(user_id, input_tokens, output_tokens)
@@ -164,11 +177,11 @@ async def health():
 async def feedback(data: Dict):
     """Record user feedback"""
     try:
-        feedback_type = data.get("type")  # "helpful", "unhelpful", "escalate"
+        feedback_type = data.get("type")  # "helpful", "unhelpful", "escalated"
         if feedback_type in ["helpful", "unhelpful", "escalated"]:
             update_metric(feedback_type, 1)
             health_monitor.record_request(success=True)
-            return {"status": "success"}
+            return {"status": "success", "message": f"Feedback recorded: {feedback_type}"}
         else:
             raise ValueError(f"Invalid feedback type: {feedback_type}")
     except Exception as e:
@@ -182,7 +195,8 @@ async def root():
         "name": "TA Chatbot API",
         "version": "1.0.0",
         "description": "AI Teaching Assistant Backend",
-        "docs": "/docs"
+        "docs": "/docs",
+        "health": "/health"
     }
 
 if __name__ == "__main__":

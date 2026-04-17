@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- Paths ---
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).parent.parent  # Backend root
 KNOWLEDGE_BASE_DIR = BASE_DIR / "knowledge_base"
 SLIDES_DIR = KNOWLEDGE_BASE_DIR / "slides"
 CODE_SAMPLES_DIR = KNOWLEDGE_BASE_DIR / "code_samples"
@@ -29,3 +29,13 @@ RETRIEVAL_K = 5  # Number of documents to retrieve
 
 # --- Course ---
 COURSE_NAME = "Lập trình C/C++ cơ bản"
+COURSE_CODE = "CS101"
+
+# --- API Security ---
+MAX_REQUESTS_PER_WINDOW = 20
+RATE_LIMIT_WINDOW_SECONDS = 60
+PER_USER_DAILY_BUDGET = 1.0  # USD
+GLOBAL_DAILY_BUDGET = 10.0  # USD
+
+# --- Logging ---
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")

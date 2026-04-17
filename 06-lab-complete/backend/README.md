@@ -1,3 +1,154 @@
+# TA Chatbot Backend
+
+AI Teaching Assistant Backend for C/C++ Course
+
+## Features
+
+- ✅ FastAPI REST API with security layers
+- ✅ Rate limiting (20 requests/min per user)
+- ✅ Cost tracking & budget protection ($1/user/day)
+- ✅ Health monitoring & uptime tracking
+- ✅ RAG-based knowledge retrieval
+- ✅ Escalation to human TA
+- ✅ User feedback collection
+
+## Project Structure
+
+```
+backend/
+├── app/                      # Application package
+│   ├── __init__.py
+│   ├── main.py              # FastAPI application entry point
+│   ├── config.py            # Configuration constants
+│   ├── auth.py              # Authentication & authorization
+│   ├── rate_limiter.py      # Sliding window rate limiter
+│   ├── cost_guard.py        # Token usage & budget tracking
+│   └── health.py            # Health monitoring
+│
+├── agent.py                 # LangGraph agent with ReAct
+├── tools/                   # Custom tools for agent
+├── rag/                     # RAG implementation
+├── utils/                   # Utility modules
+├── knowledge_base/         # Course materials
+├── faiss_index/            # Vector store index
+│
+├── Dockerfile              # Multi-stage Docker build
+├── docker-compose.yml      # Full stack (API + Redis + PostgreSQL)
+├── render.yaml            # Render.com deployment config
+├── requirements.txt       # Python dependencies
+├── .env.example           # Environment template
+├── .dockerignore          # Docker build ignore
+├── .gitignore             # Git ignore
+└── README.md             # This file
+```
+
+## Setup Instructions
+
+### 1. Local Development
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy environment file
+cp .env.example .env
+
+# Edit .env with your keys
+# - OPENAI_API_KEY: Get from https://platform.openai.com/api-keys
+# - EMAIL_USER: Your Gmail address
+# - EMAIL_PASS: Gmail app password
+
+# Run server
+python -m uvicorn app.main:app --reload --port 8000
+```
+
+Server: `http://localhost:8000`  
+Docs: `http://localhost:8000/docs`
+
+### 2. Docker Build
+
+```bash
+docker build -t ta-chatbot-api:latest .
+docker run -p 8000:8000 -e OPENAI_API_KEY=sk-proj-xxx ta-chatbot-api:latest
+```
+
+### 3. Docker Compose
+
+```bash
+cp .env.example .env
+docker-compose up -d
+```
+
+## API Endpoints
+
+### POST /chat
+```json
+{
+  "content": "Cách cài đặt gcc?",
+  "user_id": "student-001"
+}
+```
+
+Response:
+```json
+{
+  "content": "Bạn có thể tải gcc từ...",
+  "cost": 0.0042,
+  "remaining_budget": 0.9958,
+  "warning": null
+}
+```
+
+### GET /health
+Health check endpoint
+
+### GET /metrics
+Application metrics (helpful/unhelpful/escalated counts)
+
+### POST /feedback
+```json
+{
+  "type": "helpful"
+}
+```
+
+### POST /escalate
+Escalate to human TA
+
+## Configuration
+
+Edit `app/config.py`:
+
+```python
+MAX_REQUESTS_PER_WINDOW = 20
+PER_USER_DAILY_BUDGET = 1.0
+GLOBAL_DAILY_BUDGET = 10.0
+LLM_MODEL = "gpt-4o"
+```
+
+## Deployment
+
+### Render.com
+1. Root Directory: `06-lab-complete/backend`
+2. Add env vars: `OPENAI_API_KEY`, `EMAIL_USER`, `EMAIL_PASS`
+3. Deploy!
+
+### Railway.app
+```bash
+railway login
+railway init
+railway up
+```
+
+## Troubleshooting
+
+- **Import errors**: Run from backend root: `python -m uvicorn app.main:app`
+- **API key not found**: Check `.env` file exists
+- **Rate limit too strict**: Adjust `MAX_REQUESTS_PER_WINDOW` in `app/config.py`
+
+## License
+
+MIT © 2026 AI TA
 # 📖 TA_Chatbot README — Version 2.0
 
 **Version:** 2.0 (Information Processing Rules)  
