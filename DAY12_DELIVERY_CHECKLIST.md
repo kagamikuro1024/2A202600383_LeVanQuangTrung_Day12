@@ -130,9 +130,107 @@ Client → Nginx (port 80) → Agent (port 8000) → Redis (6379)
 
 ## Part 3: Cloud Deployment
 
-### Exercise 3.1: Railway deployment
-- URL: https://your-app.railway.app
-- Screenshot: [Link to screenshot in repo]
+### Exercise 3.1: Render Deployment ✅
+
+**Platform:** Render.com (Free tier)
+
+**Public URL:**
+```
+https://twoa202600383-levanquangtrung-day12.onrender.com
+```
+
+**Deployment Process:**
+1. ✅ Created production Dockerfile (multi-stage build)
+2. ✅ Created render.yaml configuration
+3. ✅ Pushed code to GitHub
+4. ✅ Connected GitHub repo to Render
+5. ✅ Render auto-deployed on git push
+6. ✅ Service status: **LIVE** 🟢
+
+**Build Information:**
+- **Base Image:** python:3.11-slim (multi-stage)
+- **Image Size:** ~56.6 MB (production optimized)
+- **Build Time:** ~5-10 minutes (first deployment)
+- **Deployment URL:** https://twoa202600383-levanquangtrung-day12.onrender.com
+- **Deploy Status:** ✅ Success
+
+### Exercise 3.2: Endpoint Testing ✅
+
+**Test Results:**
+
+```bash
+# 1. Health Check Endpoint
+GET /health
+Response: 200 OK
+{
+  "status": "ok",
+  "uptime_seconds": 21.4,
+  "version": "2.0.0",
+  "timestamp": "2026-04-17T08:41:50.247104"
+}
+✅ PASSED
+
+# 2. Ask Endpoint (Agent Query)
+POST /ask
+Body: {"question": "Hello"}
+Headers: X-API-Key: sk-test-part3-change-later
+Response: 200 OK
+{
+  "answer": "Agent đang hoạt động tốt! (mock response) Hỏi thêm câu hỏi đi nhé."
+}
+✅ PASSED
+
+# 3. Ready Endpoint (Readiness Check)
+GET /ready
+Response: 200 OK
+{"ready": true}
+✅ PASSED
+```
+
+**Test Commands (for reproduction):**
+```bash
+# Health check
+curl https://twoa202600383-levanquangtrung-day12.onrender.com/health
+
+# Agent ask with API key
+curl -X POST https://twoa202600383-levanquangtrung-day12.onrender.com/ask \
+  -H "X-API-Key: sk-test-part3-change-later" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Hello"}'
+
+# Readiness check
+curl https://twoa202600383-levanquangtrung-day12.onrender.com/ready
+```
+
+**Key Features Verified:**
+- ✅ Health check endpoint responsive
+- ✅ Agent endpoint accepting POST requests
+- ✅ Mock LLM integration working
+- ✅ Environment variables loaded (ENVIRONMENT=production)
+- ✅ Multi-stage Docker build optimized
+- ✅ Non-root user (appuser) running container
+- ✅ CORS middleware configured
+- ✅ JSON structured logging enabled
+
+**Environment Variables Set on Render:**
+| Variable | Value |
+|----------|-------|
+| ENVIRONMENT | production |
+| LOG_LEVEL | info |
+| AGENT_API_KEY | sk-test-part3-change-later |
+| DEBUG | false |
+| PORT | 8000 (auto-assigned by Render) |
+
+**Files Deployed:**
+- ✅ Dockerfile (multi-stage production build)
+- ✅ render.yaml (Render deployment config)
+- ✅ .env.example (environment template)
+- ✅ 02-docker/production/main.py (FastAPI app)
+- ✅ 02-docker/production/requirements.txt (dependencies)
+- ✅ utils/mock_llm.py (mock LLM module)
+
+**Summary:**
+Part 3 completed successfully! Agent is deployed on Render cloud and responding to requests from a public URL. Multi-stage Docker optimization achieved 86.6% size reduction (56.6 MB), security best practices implemented (non-root user, env vars, no hardcoded secrets).
 
 ## Part 4: API Security
 
@@ -207,7 +305,7 @@ curl https://your-agent.railway.app/health
 # Expected: {"status": "ok"}
 ```
 
-### API Test (with authentication)
+### API Test (with authentication)production
 ```bash
 curl -X POST https://your-agent.railway.app/ask \
   -H "X-API-Key: YOUR_KEY" \
