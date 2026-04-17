@@ -4,9 +4,6 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
-    "NEXT_PUBLIC_API_URL": {
-      "description": "Backend API URL",
-      "required": false
-    }
+    "NEXT_PUBLIC_API_URL": "https://ta-chatbot-hehe.onrender.com"
   }
 }
