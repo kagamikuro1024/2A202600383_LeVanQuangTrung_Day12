@@ -6,7 +6,7 @@ Tra cứu thông tin khóa học.
 import json
 from langchain_core.tools import tool
 
-import config
+from app import config
 
 
 def _load_course_info() -> dict:

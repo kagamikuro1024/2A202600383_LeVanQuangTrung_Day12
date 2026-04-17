@@ -13,7 +13,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_text_splitters import RecursiveCharacterTextSplitter, MarkdownHeaderTextSplitter
 from langchain_core.documents import Document
 
-import config
+from app import config
 
 
 def load_markdown_files(directory: Path) -> list[Document]:

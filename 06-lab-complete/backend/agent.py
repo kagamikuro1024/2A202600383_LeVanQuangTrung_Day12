@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import AIMessage
 
-import config
+from app import config
 from tools.search_materials import search_course_materials
 from tools.code_analyzer import analyze_code_error
 from tools.course_info import get_course_info
