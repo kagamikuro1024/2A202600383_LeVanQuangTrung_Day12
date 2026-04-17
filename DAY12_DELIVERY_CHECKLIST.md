@@ -1,8 +1,8 @@
 # Báo Cáo Day 12 Lab - Deployment AI Teaching Assistant
 
-> **Họ Tên:** _________________________  
-> **MSSV:** _________________________  
-> **Ngày nộp:** _________________________
+> **Họ Tên:** Lê Văn Quang Trung
+> **MSSV:** 2A202600383  
+> **Ngày nộp:** 17/04/2026
 
 ---
 
@@ -91,7 +91,7 @@ Status: ✅ Tất cả services hoạt động bình thường
 
 **Public URL:**
 ```
-https://ta-chatbot-hehe.onrender.com
+https://twoa202600383-levanquangtrung-day12.onrender.com
 ```
 
 **Quá trình triển khai:**
@@ -105,7 +105,7 @@ https://ta-chatbot-hehe.onrender.com
 - Base Image: python:3.11-slim
 - Image Size: ~56.6 MB
 - Build Time: ~5-10 phút (first deploy)
-- Deployment URL: https://ta-chatbot-hehe.onrender.com
+- Deployment URL: https://twoa202600383-levanquangtrung-day12.onrender.com
 - Status: ✅ Thành công
 
 ### 3.2: Test Endpoints ✅
