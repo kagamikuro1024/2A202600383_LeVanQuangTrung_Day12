@@ -47,7 +47,7 @@ body.light {
 
 /* Smooth transitions */
 @layer components {
-  .transition-colors {
+  .smooth-transition {
     @apply transition-colors duration-200;
   }
 
