@@ -39,8 +39,7 @@ class HealthMonitor:
         return {
             "status": "healthy" if error_rate < 5 else "degraded",
             "uptime_seconds": round(uptime, 2),
-            "requests": self.request_count,
-            "errors": self.error_count,
-            "error_rate_percent": round(error_rate, 2),
-            "timestamp": datetime.utcnow().isoformat()
+            "total_requests": self.request_count,
+            "error_count": self.error_count,
+            "error_rate": round(error_rate, 2)
         }
