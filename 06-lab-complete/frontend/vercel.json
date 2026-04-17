@@ -1,0 +1,13 @@
+{
+  "name": "ta-chatbot-frontend",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "env": [
+    {
+      "key": "NEXT_PUBLIC_API_URL",
+      "description": "Backend API URL",
+      "required": false
+    }
+  ]
+}
