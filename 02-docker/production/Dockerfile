@@ -44,8 +44,11 @@ WORKDIR /app
 # Copy installed packages từ builder
 COPY --from=builder /root/.local /home/appuser/.local
 
-# Copy source code
+# Copy source code and security modules
 COPY 02-docker/production/main.py .
+COPY 02-docker/production/auth.py .
+COPY 02-docker/production/rate_limiter.py .
+COPY 02-docker/production/cost_guard.py .
 
 # Copy utils from project root
 RUN mkdir -p /app/utils
